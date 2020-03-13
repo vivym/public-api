@@ -1,0 +1,39 @@
+name: deploy
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    name: deploy
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: SCP k8s deployment.yaml
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        port: ${{ secrets.SSH_PORT }}
+        username: ${{ secrets.SSH_USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        source: "*.yaml,nfs-client-provisioner/*.yaml"
+        target: public-api/base
+    
+    - name: Deploy
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        port: ${{ secrets.SSH_PORT }}
+        username: ${{ secrets.SSH_USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        script_stop: true
+        script: |
+          /snap/bin/microk8s.kubectl apply -f public-api/base/nfs-client-provisioner/*.yaml
+          /snap/bin/microk8s.kubectl apply -f public-api/base/namespace.yaml
+          /snap/bin/microk8s.kubectl apply -f public-api/base/mongodb.yaml
+          /snap/bin/microk8s.kubectl apply -f public-api/base/redis.yaml
