@@ -33,7 +33,9 @@ jobs:
         password: ${{ secrets.SSH_PASSWORD }}
         script_stop: true
         script: |
-          /snap/bin/microk8s.kubectl apply -f public-api/base/nfs-client-provisioner/*.yaml
+          /snap/bin/microk8s.kubectl apply -f public-api/base/nfs-client-provisioner/class.yaml
+          /snap/bin/microk8s.kubectl apply -f public-api/base/nfs-client-provisioner/rbac.yaml
+          /snap/bin/microk8s.kubectl apply -f public-api/base/nfs-client-provisioner/deployment.yaml
           /snap/bin/microk8s.kubectl apply -f public-api/base/namespace.yaml
           /snap/bin/microk8s.kubectl apply -f public-api/base/mongodb.yaml
           /snap/bin/microk8s.kubectl apply -f public-api/base/redis.yaml
